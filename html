@@ -1,0 +1,599 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MyHospital Zambia</title>
+<style>
+:root{
+  --bg:#F2F0E6; --surface:#FFFFFF; --ink:#16201B; --muted:#5B6A61;
+  --teal:#0B3D36; --teal-dark:#082A25; --orange:#DE7C1E; --green:#2E7D5B;
+  --red:#C8373D; --line:#DAD4C2; --radius:12px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#10211D; --surface:#17302A; --ink:#EDEFE9; --muted:#9FB0A5;
+    --teal:#4FA393; --teal-dark:#0B3D36; --orange:#F2975A; --green:#5FBE94;
+    --red:#F08A8F; --line:#28453C; color-scheme: dark;
+  }
+}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+  min-height:100%;
+}
+h1,h2,h3{margin:0 0 .3em; letter-spacing:-.01em; font-weight:700}
+h1{font-size:clamp(1.6rem,4vw,2.4rem)}
+h2{font-size:1.3rem}
+p{line-height:1.55; color:var(--muted); margin:.2em 0 1em}
+button{font-family:inherit; cursor:pointer}
+a{color:inherit}
+.hidden{display:none !important}
+.wrap{max-width:960px; margin:0 auto; padding:0 20px}
+.btn{
+  background:var(--teal); color:#fff; border:none; border-radius:999px;
+  padding:.7em 1.4em; font-size:.95rem; font-weight:600; transition:transform .12s, opacity .12s;
+}
+.btn:hover{opacity:.9}
+.btn:active{transform:scale(.97)}
+.btn.outline{background:transparent; color:var(--teal); border:1.5px solid var(--teal)}
+.btn.accent{background:var(--orange)}
+.btn.sm{padding:.45em 1em; font-size:.85rem}
+.card{
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+  padding:18px 20px; margin-bottom:16px;
+}
+input,select,textarea{
+  width:100%; padding:.65em .8em; border:1.5px solid var(--line); border-radius:8px;
+  background:var(--surface); color:var(--ink); font-size:.95rem; margin:.3em 0 .8em;
+}
+label{font-size:.85rem; font-weight:600; color:var(--muted)}
+table{width:100%; border-collapse:collapse; font-size:.9rem}
+th,td{text-align:left; padding:.55em .4em; border-bottom:1px solid var(--line)}
+th{color:var(--muted); font-weight:600; font-size:.8rem}
+.badge{display:inline-block; padding:.2em .7em; border-radius:999px; font-size:.78rem; font-weight:600}
+.badge.ok{background:rgba(46,125,91,.15); color:var(--green)}
+.badge.warn{background:rgba(222,124,30,.18); color:var(--orange)}
+.badge.err{background:rgba(200,55,61,.15); color:var(--red)}
+.grid{display:grid; gap:16px}
+.grid.cols-2{grid-template-columns:1fr 1fr}
+.grid.cols-3{grid-template-columns:repeat(3,1fr)}
+@media(max-width:700px){.grid.cols-2,.grid.cols-3{grid-template-columns:1fr}}
+.quicklink{display:block; text-decoration:none; background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:16px; font-weight:700; color:var(--ink)}
+.quicklink span{display:block; font-weight:400; color:var(--muted); font-size:.85rem; margin-top:.3em}
+header#app-header{position:sticky; top:0; z-index:10; background:var(--teal); color:#fff; padding-top:env(safe-area-inset-top,0px)}
+.nav-inner{display:flex; align-items:center; gap:10px; padding:12px 20px; max-width:960px; margin:0 auto; flex-wrap:wrap}
+.brand{font-weight:800; font-size:1.05rem; margin-right:auto}
+.brand small{display:block; font-weight:400; font-size:.7rem; opacity:.8}
+nav.tabs{display:flex; gap:4px; flex-wrap:wrap}
+nav.tabs button{background:transparent; border:none; color:#fff; opacity:.75; padding:.5em .8em; border-radius:8px; font-size:.88rem; font-weight:600}
+nav.tabs button.active{opacity:1; background:rgba(255,255,255,.14)}
+.hdr-side select{width:auto; margin:0; padding:.35em .5em; font-size:.8rem}
+#view-login{min-height:100vh; display:flex; align-items:center; justify-content:center; padding:40px 20px}
+.login-box{max-width:420px; width:100%}
+.tabbar{display:flex; gap:6px; margin-bottom:14px}
+.tabbar button{flex:1; padding:.6em; border-radius:8px; border:1.5px solid var(--line); background:var(--surface); color:var(--muted); font-weight:600}
+.tabbar button.active{background:var(--teal); color:#fff; border-color:var(--teal)}
+.hint{font-size:.8rem; color:var(--muted)}
+.stepper{display:flex; flex-direction:column; gap:0; margin:1em 0}
+.step{display:flex; gap:12px; padding:10px 0}
+.step .dot{width:26px; height:26px; border-radius:50%; background:var(--line); color:var(--muted); display:flex; align-items:center; justify-content:center; font-size:.75rem; font-weight:700; flex-shrink:0}
+.step.done .dot{background:var(--green); color:#fff}
+.step.active .dot{background:var(--orange); color:#fff}
+.step .tl{font-weight:700}
+.step .sub{font-size:.82rem; color:var(--muted)}
+.chat-log{max-height:260px; overflow-y:auto; display:flex; flex-direction:column; gap:8px; margin-bottom:10px; padding-right:4px}
+.msg{max-width:78%; padding:.6em .9em; border-radius:14px; font-size:.9rem; line-height:1.4}
+.msg.user{align-self:flex-end; background:var(--teal); color:#fff; border-bottom-right-radius:3px}
+.msg.bot{align-self:flex-start; background:var(--bg); border:1px solid var(--line); border-bottom-left-radius:3px}
+.chat-row{display:flex; gap:8px}
+.chat-row input{margin:0}
+#tele-video{width:100%; max-width:320px; border-radius:var(--radius); background:#000; display:block}
+.campus{display:grid; grid-template-columns:repeat(3,1fr); gap:8px}
+.campus div{background:var(--surface); border:1.5px solid var(--line); border-radius:8px; padding:14px 8px; text-align:center; font-size:.82rem; font-weight:600; cursor:pointer}
+.campus div.sel{border-color:var(--orange); background:rgba(222,124,30,.1)}
+.toast{position:fixed; bottom:calc(20px + env(safe-area-inset-bottom,0px)); left:50%; transform:translateX(-50%); background:var(--ink); color:var(--bg); padding:.7em 1.2em; border-radius:999px; font-size:.85rem; opacity:0; pointer-events:none; transition:opacity .25s, transform .25s; z-index:50; max-width:90vw; text-align:center}
+.toast.show{opacity:1; transform:translateX(-50%) translateY(-6px)}
+.toggle-row{display:flex; align-items:center; justify-content:space-between; padding:.6em 0; border-bottom:1px solid var(--line)}
+.switch{position:relative; width:42px; height:24px; flex-shrink:0}
+.switch input{opacity:0; width:0; height:0}
+.slider{position:absolute; inset:0; background:var(--line); border-radius:999px; transition:.2s}
+.slider:before{content:"";position:absolute; width:18px; height:18px; left:3px; top:3px; background:#fff; border-radius:50%; transition:.2s}
+input:checked + .slider{background:var(--green)}
+input:checked + .slider:before{transform:translateX(18px)}
+footer.site{text-align:center; padding:28px 20px 40px; color:var(--muted); font-size:.8rem}
+.sec-head{margin-bottom:14px}
+.queue-num{font-size:2.6rem; font-weight:800; color:var(--orange)}
+.receipt{font-family:ui-monospace,Menlo,Consolas,monospace; font-size:.82rem; background:var(--bg); border:1px dashed var(--line); border-radius:8px; padding:12px; white-space:pre-wrap}
+</style>
+</head>
+<body>
+
+<section id="view-login">
+  <div class="login-box">
+    <h1>🏥 MyHospital Zambia</h1>
+    <p>Bridging the gap between Zambia’s hospitals and the people through digital healthcare.</p>
+    <div class="tabbar">
+      <button id="tab-demo" class="active" onclick="switchLoginTab('demo')">Demo login</button>
+      <button id="tab-otp" onclick="switchLoginTab('otp')">NRC / Passport + OTP</button>
+    </div>
+
+    <div id="login-demo" class="card">
+      <label>Username</label>
+      <input id="demo-user" value="patient">
+      <label>Password</label>
+      <input id="demo-pass" type="password" value="12345">
+      <button class="btn" style="width:100%" onclick="loginDemo()">Log in</button>
+      <p class="hint">Demo credentials are pre-filled — just press Log in.</p>
+    </div>
+
+    <div id="login-otp" class="card hidden">
+      <label>NRC or Passport number</label>
+      <input id="otp-nrc" placeholder="e.g. 123456/78/1">
+      <button class="btn outline" style="width:100%" onclick="sendOtp()">Send OTP</button>
+      <div id="otp-step2" class="hidden">
+        <label style="margin-top:.8em">Enter the 4-digit code</label>
+        <input id="otp-code" maxlength="4" placeholder="••••">
+        <button class="btn" style="width:100%" onclick="verifyOtp()">Verify &amp; log in</button>
+      </div>
+    </div>
+    <p class="hint">🔒 Simulated end-to-end encryption protects your health information.</p>
+  </div>
+</section>
+
+<header id="app-header" class="hidden">
+  <div class="nav-inner">
+    <div class="brand">MyHospital Zambia<small>Patient Portal</small></div>
+    <nav class="tabs">
+      <button data-view="home" onclick="go('home')">Home</button>
+      <button data-view="meds" onclick="go('meds')">Meds</button>
+      <button data-view="appointments" onclick="go('appointments')">Appointments</button>
+      <button data-view="billing" onclick="go('billing')">Billing</button>
+      <button data-view="profile" onclick="go('profile')">Profile</button>
+    </nav>
+    <div class="hdr-side">
+      <select onchange="setLang(this.value)">
+        <option value="en">English</option>
+        <option value="ny">Nyanja</option>
+        <option value="be">Bemba</option>
+      </select>
+    </div>
+  </div>
+</header>
+
+<main class="wrap" style="padding-top:20px">
+
+<section id="view-home" class="view hidden">
+  <h1 data-i18n="welcome">Welcome back, Alex</h1>
+  <p data-i18n="tagline">Bridging the gap between Zambia’s hospitals and the people through digital healthcare.</p>
+
+  <div class="grid cols-3">
+    <a class="quicklink" onclick="go('appointments')">📅 <span data-i18n="bookApt">Book an appointment</span></a>
+    <a class="quicklink" onclick="go('meds')">💊 <span data-i18n="viewMeds">View health card &amp; meds</span></a>
+    <a class="quicklink" onclick="go('billing')">💳 <span data-i18n="payBill">Pay a hospital bill</span></a>
+  </div>
+
+  <div class="card">
+    <div class="sec-head"><h2>Your care journey</h2><p>A live walkthrough of what happens from referral to results.</p></div>
+    <div class="stepper" id="journey"></div>
+    <button class="btn accent" onclick="runJourney()">Simulate my journey</button>
+  </div>
+
+  <div class="card">
+    <div class="sec-head"><h2>Find your way</h2><p>Tap a department to see its location on the campus map.</p></div>
+    <div class="campus" id="campus"></div>
+    <p id="campus-info" class="hint">Select a department above.</p>
+  </div>
+
+  <div class="card">
+    <h2>Department directory</h2>
+    <table>
+      <tr><th>Department</th><th>Contact</th><th>Visiting hours</th><th>Wards</th></tr>
+      <tr><td>OPD / General</td><td>+260 211 254 085</td><td>07:00–17:00</td><td>—</td></tr>
+      <tr><td>Cardiology</td><td>+260 211 254 112</td><td>08:00–16:00</td><td>Ward C1–C3</td></tr>
+      <tr><td>Orthopedics</td><td>+260 211 254 130</td><td>08:00–16:00</td><td>Ward O1–O4</td></tr>
+      <tr><td>Pediatrics</td><td>+260 211 254 141</td><td>24 hours</td><td>Ward P1–P2</td></tr>
+      <tr><td>Pharmacy</td><td>+260 211 254 160</td><td>07:00–20:00</td><td>—</td></tr>
+    </table>
+  </div>
+</section>
+
+<section id="view-meds" class="view hidden">
+  <h1 data-i18n="healthCard">Digital health card</h1>
+  <div class="card">
+    <div class="grid cols-2">
+      <div><strong>Alex Mulenga</strong><br><span class="hint">NRC: 123456/78/1 · Blood group: O+</span></div>
+      <div style="text-align:right"><span class="badge ok">Record active</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Diagnosis &amp; treatment history</h2>
+    <table>
+      <tr><th>Date</th><th>Diagnosis</th><th>Treatment</th></tr>
+      <tr><td>14 Aug 2025</td><td>Malaria (uncomplicated)</td><td>Artemether-lumefantrine, 3 days</td></tr>
+      <tr><td>02 May 2025</td><td>Hypertension, stage 1</td><td>Amlodipine 5mg daily</td></tr>
+      <tr><td>19 Jan 2025</td><td>Fractured wrist (L)</td><td>Cast, Orthopedics follow-up</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Lab &amp; radiology results</h2>
+    <table id="lab-table">
+      <tr><th>Test</th><th>Date</th><th></th></tr>
+      <tr><td>Full blood count</td><td>14 Aug 2025</td><td><button class="btn sm outline" onclick="downloadReport('Full Blood Count')">Download PDF</button></td></tr>
+      <tr><td>Wrist X-ray</td><td>19 Jan 2025</td><td><button class="btn sm outline" onclick="downloadReport('Wrist X-Ray')">Download PDF</button></td></tr>
+      <tr><td>Lipid panel</td><td>02 May 2025</td><td><button class="btn sm outline" onclick="downloadReport('Lipid Panel')">Download PDF</button></td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Prescriptions &amp; reminders</h2>
+    <div id="rx-list"></div>
+  </div>
+
+  <div class="card">
+    <h2>Telemedicine consultation</h2>
+    <p id="tele-status">Start a video consultation with the on-call physician.</p>
+    <video id="tele-video" class="hidden" autoplay muted playsinline></video>
+    <div style="margin-top:10px">
+      <button class="btn" id="tele-start" onclick="startTele()">Start consultation</button>
+      <button class="btn outline hidden" id="tele-end" onclick="endTele()">End call</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Pharmacist chat</h2>
+    <div class="chat-log" id="chat-log"></div>
+    <div class="chat-row">
+      <input id="chat-input" placeholder="Ask the pharmacist…" onkeydown="if(event.key==='Enter')sendChat()">
+      <button class="btn sm" onclick="sendChat()">Send</button>
+    </div>
+    <button class="btn sm outline" style="margin-top:8px" onclick="askSample()">Ask: “What are the side effects of Atorvastatin?”</button>
+  </div>
+</section>
+
+<section id="view-appointments" class="view hidden">
+  <h1 data-i18n="appointments">Appointments</h1>
+  <div class="card">
+    <h2>Book an OPD appointment</h2>
+    <label>Clinic</label>
+    <select id="apt-dept">
+      <option>Cardiology</option>
+      <option selected>Orthopedics</option>
+      <option>Pediatrics</option>
+      <option>General OPD</option>
+    </select>
+    <label>Preferred date</label>
+    <input id="apt-date" type="date" value="2025-11-20">
+    <label>Referral letter (optional)</label>
+    <input id="apt-file" type="file">
+    <span id="apt-file-name" class="hint"></span>
+    <button class="btn" style="margin-top:8px" onclick="bookAppointment()">Confirm booking</button>
+  </div>
+
+  <div class="card hidden" id="booking-result"></div>
+
+  <div class="card hidden" id="queue-card">
+    <h2>Live queue tracker</h2>
+    <div class="queue-num" id="queue-pos">—</div>
+    <p id="queue-sub" class="hint">Estimated wait updates automatically.</p>
+  </div>
+
+  <div class="card">
+    <h2>Your appointments</h2>
+    <table id="apt-table">
+      <tr><th>Clinic</th><th>Date</th><th>Status</th></tr>
+    </table>
+  </div>
+</section>
+
+<section id="view-billing" class="view hidden">
+  <h1 data-i18n="billing">Billing &amp; payments</h1>
+  <div class="card">
+    <div class="grid cols-2">
+      <div><span class="hint">Outstanding balance</span><h2>K 450.00</h2></div>
+      <div><span class="hint">Due date</span><h2>30 Nov 2025</h2></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Pay with mobile money</h2>
+    <label>Provider</label>
+    <select id="pay-provider">
+      <option>Airtel Money</option>
+      <option>MTN MoMo</option>
+      <option>Zamtel Kwacha</option>
+    </select>
+    <label>Mobile number</label>
+    <input id="pay-phone" placeholder="09X XXX XXXX">
+    <button class="btn accent" onclick="payBill()">Pay K 450.00</button>
+    <p id="pay-status" class="hint"></p>
+  </div>
+
+  <div class="card hidden" id="receipt-card"></div>
+
+  <div class="card">
+    <h2>Payment history</h2>
+    <table id="bill-history">
+      <tr><th>Date</th><th>Provider</th><th>Amount</th><th>Status</th></tr>
+      <tr><td>03 Oct 2025</td><td>MTN MoMo</td><td>K 180.00</td><td><span class="badge ok">Paid</span></td></tr>
+      <tr><td>22 Aug 2025</td><td>Airtel Money</td><td>K 95.00</td><td><span class="badge ok">Paid</span></td></tr>
+    </table>
+  </div>
+</section>
+
+<section id="view-profile" class="view hidden">
+  <h1 data-i18n="profile">Profile</h1>
+  <div class="card">
+    <table>
+      <tr><td class="hint">Full name</td><td><strong>Alex Mulenga</strong></td></tr>
+      <tr><td class="hint">NRC</td><td>123456/78/1</td></tr>
+      <tr><td class="hint">Date of birth</td><td>04 Mar 1994</td></tr>
+      <tr><td class="hint">Facility</td><td>University Teaching Hospital, Lusaka</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <div class="toggle-row">
+      <div><strong>Offline mode</strong><div class="hint">Cache your records on this device</div></div>
+      <label class="switch"><input type="checkbox" id="offline-toggle" onchange="toggleOffline(this.checked)"><span class="slider"></span></label>
+    </div>
+    <p class="hint" id="offline-note"></p>
+  </div>
+  <div class="card">
+    <p class="hint">🔒 All data on this device is protected by a simulated end-to-end encryption layer. No real medical data is transmitted — this is a demo environment.</p>
+  </div>
+  <button class="btn outline" onclick="logout()">Log out</button>
+</section>
+
+</main>
+
+<footer class="site">All Rights Reserved — Designed by Chembe mulila</footer>
+<div class="toast" id="toast"></div>
+
+<script>
+const $=s=>document.querySelector(s);
+function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(window._tt);window._tt=setTimeout(()=>t.classList.remove('show'),2600);}
+function store(k,v){localStorage.setItem(k,JSON.stringify(v));}
+function load(k,d){try{const v=localStorage.getItem(k);return v===null?d:JSON.parse(v);}catch(e){return d;}}
+
+const I18N={
+  welcome:{en:'Welcome back, Alex',ny:'Mwadziwadzisa, Alex',be:'Mwaiseni, Alex'},
+  tagline:{en:'Bridging the gap between Zambia’s hospitals and the people through digital healthcare.',ny:'Kugwirizanitsa zipatala za Zambia ndi anthu kudzera mu umoyo wa digito.',be:'Ukwampanya amashitela ya Zambia na bantu ukupitila ku bulamba bwa dijito.'},
+  bookApt:{en:'Book an appointment',ny:'Konzani tsiku lobwerera',be:'Boekelako inshita'},
+  viewMeds:{en:'View health card & meds',ny:'Onani kadi yathanzi ndi mankhwala',be:'Moneni kadi ya mikalile ne mishiliko'},
+  payBill:{en:'Pay a hospital bill',ny:'Lipirani belo ya chipatala',be:'Lipila belo ya shitela'},
+  healthCard:{en:'Digital health card',ny:'Kadi yathanzi ya digito',be:'Kadi ya mikalile iya dijito'},
+  appointments:{en:'Appointments',ny:'Mabwerero',be:'Amasuba ya kubwelela'},
+  billing:{en:'Billing & payments',ny:'Mabilo ndi malipiro',be:'Amabelo na kulipila'},
+  profile:{en:'Profile',ny:'Mbiri yanu',be:'Ifikuyanda'}
+};
+function setLang(l){store('mh_lang',l);applyLang();}
+function applyLang(){const l=load('mh_lang','en');document.querySelectorAll('[data-i18n]').forEach(el=>{const k=el.dataset.i18n;if(I18N[k])el.textContent=I18N[k][l]||I18N[k].en;});}
+
+function switchLoginTab(t){
+  $('#tab-demo').classList.toggle('active',t==='demo');
+  $('#tab-otp').classList.toggle('active',t==='otp');
+  $('#login-demo').classList.toggle('hidden',t!=='demo');
+  $('#login-otp').classList.toggle('hidden',t!=='otp');
+}
+let _otp=null;
+function sendOtp(){
+  if(!$('#otp-nrc').value.trim()){toast('Enter your NRC or passport number');return;}
+  _otp=String(Math.floor(1000+Math.random()*9000));
+  $('#otp-step2').classList.remove('hidden');
+  toast('OTP sent via SMS (demo code: '+_otp+')');
+}
+function verifyOtp(){
+  if($('#otp-code').value.trim()===_otp){doLogin();} else {toast('Incorrect code, try again');}
+}
+function loginDemo(){
+  if($('#demo-user').value==='patient' && $('#demo-pass').value==='12345'){doLogin();}
+  else {toast('Invalid demo credentials');}
+}
+function doLogin(){
+  store('mh_logged_in',true);
+  $('#view-login').classList.add('hidden');
+  $('#app-header').classList.remove('hidden');
+  go('home');
+  toast('Welcome to MyHospital Zambia');
+}
+function logout(){
+  localStorage.removeItem('mh_logged_in');
+  $('#app-header').classList.add('hidden');
+  document.querySelectorAll('.view').forEach(v=>v.classList.add('hidden'));
+  $('#view-login').classList.remove('hidden');
+}
+
+function go(view){
+  document.querySelectorAll('.view').forEach(v=>v.classList.add('hidden'));
+  $('#view-'+view).classList.remove('hidden');
+  document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.toggle('active',b.dataset.view===view));
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+const JOURNEY=[
+  {t:'Referral letter uploaded',s:'Shared with Orthopedics clinic'},
+  {t:'Appointment confirmed',s:'Orthopedics — 20 Nov 2025'},
+  {t:'Hospital fee paid',s:'Via mobile money'},
+  {t:'Navigated to department',s:'Block A, Ground Floor'},
+  {t:'Lab results received',s:'Notification sent to your phone'}
+];
+function renderJourney(active){
+  $('#journey').innerHTML=JOURNEY.map((j,i)=>{
+    const cls=i<active?'done':(i===active?'active':'');
+    const icon=i<active?'✓':(i+1);
+    return `<div class="step ${cls}"><div class="dot">${icon}</div><div><div class="tl">${j.t}</div><div class="sub">${j.s}</div></div></div>`;
+  }).join('');
+}
+function runJourney(){
+  let i=0;renderJourney(0);
+  const iv=setInterval(()=>{i++;renderJourney(i);if(i>=JOURNEY.length){clearInterval(iv);toast('Journey complete — results delivered');}},900);
+}
+renderJourney(-1);
+
+const DEPTS=[
+  {n:'OPD',loc:'Entrance, Ground Floor — follow the green line'},
+  {n:'Cardiology',loc:'Block B, 1st Floor, left of the lifts'},
+  {n:'Orthopedics',loc:'Block A, Ground Floor, past the pharmacy'},
+  {n:'Pediatrics',loc:'Block C, Ground Floor, blue wing'},
+  {n:'Pharmacy',loc:'Block A, Ground Floor, next to OPD'},
+  {n:'Radiology',loc:'Basement, Block B'}
+];
+$('#campus').innerHTML=DEPTS.map(d=>`<div onclick="pickDept('${d.n}',this)">${d.n}</div>`).join('');
+function pickDept(name,el){
+  document.querySelectorAll('.campus div').forEach(d=>d.classList.remove('sel'));
+  el.classList.add('sel');
+  const d=DEPTS.find(x=>x.n===name);
+  $('#campus-info').textContent=d.n+' — '+d.loc;
+}
+
+let queueTimer=null;
+$('#apt-file').addEventListener('change',e=>{$('#apt-file-name').textContent=e.target.files[0]?('Attached: '+e.target.files[0].name):'';});
+function fmtDate(iso){const d=new Date(iso+'T00:00:00');return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});}
+function bookAppointment(){
+  const dept=$('#apt-dept').value, date=$('#apt-date').value||'2025-11-20';
+  const list=load('mh_appts',[]);
+  list.push({dept,date,status:'Confirmed'});
+  store('mh_appts',list);
+  $('#booking-result').classList.remove('hidden');
+  $('#booking-result').innerHTML=`<span class="badge ok">Confirmed</span><h2 style="margin-top:.4em">${dept} Appointment – ${fmtDate(date)} – Confirmed</h2><p>A confirmation has been sent to your phone.</p>`;
+  renderAppts();
+  startQueue();
+}
+function renderAppts(){
+  const list=load('mh_appts',[]);
+  $('#apt-table').innerHTML='<tr><th>Clinic</th><th>Date</th><th>Status</th></tr>'+
+    list.map(a=>`<tr><td>${a.dept}</td><td>${fmtDate(a.date)}</td><td><span class="badge ok">${a.status}</span></td></tr>`).join('');
+}
+function startQueue(){
+  clearInterval(queueTimer);
+  $('#queue-card').classList.remove('hidden');
+  let pos=Math.floor(Math.random()*5)+4;
+  $('#queue-pos').textContent=pos;
+  $('#queue-sub').textContent='You are number '+pos+' in the queue.';
+  queueTimer=setInterval(()=>{
+    pos--;
+    if(pos<=0){$('#queue-pos').textContent='✓';$('#queue-sub').textContent='Please proceed to the consultation room.';clearInterval(queueTimer);return;}
+    $('#queue-pos').textContent=pos;$('#queue-sub').textContent='You are number '+pos+' in the queue.';
+  },3000);
+}
+renderAppts();
+
+function downloadReport(name){
+  const text='MyHospital Zambia — Simulated Report\n\nPatient: Alex Mulenga\nTest: '+name+'\nDate: '+new Date().toLocaleDateString()+'\nResult: Within normal range (demo data).\n';
+  const blob=new Blob([text],{type:'application/pdf'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name.replace(/\s+/g,'_')+'.pdf';a.click();
+  toast('Download started: '+name);
+}
+const RX=[
+  {name:'Amlodipine 5mg',freq:'Once daily, morning'},
+  {name:'Artemether-Lumefantrine',freq:'Twice daily with food, 3 days'},
+  {name:'Atorvastatin 20mg',freq:'Once daily, evening'}
+];
+function renderRx(){
+  const reminders=load('mh_reminders',{});
+  $('#rx-list').innerHTML=RX.map(r=>{
+    const set=reminders[r.name];
+    return `<div class="toggle-row"><div><strong>${r.name}</strong><div class="hint">${r.freq}</div></div>
+    <button class="btn sm ${set?'outline':''}" onclick="setReminder('${r.name}')">${set?('Reminder: '+set):'Set reminder'}</button></div>`;
+  }).join('');
+}
+function setReminder(name){
+  const time=prompt('Set a daily reminder time for '+name+' (e.g. 08:00)','08:00');
+  if(!time)return;
+  const reminders=load('mh_reminders',{});reminders[name]=time;store('mh_reminders',reminders);renderRx();
+  toast('Reminder set for '+name+' at '+time);
+}
+renderRx();
+
+let teleStream=null;
+async function startTele(){
+  $('#tele-status').textContent='Connecting to Dr. Banda…';
+  $('#tele-start').classList.add('hidden');
+  try{
+    teleStream=await navigator.mediaDevices.getUserMedia({video:true,audio:true});
+    const v=$('#tele-video');v.srcObject=teleStream;v.classList.remove('hidden');
+    setTimeout(()=>{$('#tele-status').textContent='Connected with Dr. Banda — Orthopedics.';},1500);
+  }catch(e){
+    $('#tele-status').textContent='Camera unavailable — showing simulated consultation only.';
+    setTimeout(()=>{$('#tele-status').textContent='Connected with Dr. Banda — Orthopedics (simulated).';},1500);
+  }
+  $('#tele-end').classList.remove('hidden');
+}
+function endTele(){
+  if(teleStream)teleStream.getTracks().forEach(t=>t.stop());
+  $('#tele-video').classList.add('hidden');
+  $('#tele-start').classList.remove('hidden');
+  $('#tele-end').classList.add('hidden');
+  $('#tele-status').textContent='Call ended. Start a new video consultation with the on-call physician.';
+}
+
+const PHARM_REPLIES=[
+  {k:['atorvastatin'],a:'Atorvastatin can cause muscle aches, headache, nausea or mild digestive upset. Rarely, it affects the liver — contact your pharmacist if you notice unusual tiredness or yellowing of the skin.'},
+  {k:['amlodipine'],a:'Amlodipine may cause ankle swelling, flushing or headache, especially in the first weeks of treatment.'},
+  {k:['malaria','artemether'],a:'Artemether-lumefantrine is usually well tolerated; mild nausea, dizziness or loss of appetite can occur — take it with food.'}
+];
+function botReply(msg){
+  const low=msg.toLowerCase();
+  const hit=PHARM_REPLIES.find(r=>r.k.some(k=>low.includes(k)));
+  return hit?hit.a:'Thanks for your question — a pharmacist will review it shortly. For urgent concerns, please call the pharmacy on +260 211 254 160.';
+}
+function pushMsg(text,who){
+  const d=document.createElement('div');d.className='msg '+who;d.textContent=text;
+  $('#chat-log').appendChild(d);$('#chat-log').scrollTop=$('#chat-log').scrollHeight;
+}
+function sendChat(){
+  const v=$('#chat-input').value.trim();if(!v)return;
+  pushMsg(v,'user');$('#chat-input').value='';
+  setTimeout(()=>pushMsg(botReply(v),'bot'),500);
+}
+function askSample(){
+  pushMsg('What are the side effects of Atorvastatin?','user');
+  setTimeout(()=>pushMsg(botReply('atorvastatin'),'bot'),500);
+}
+
+function payBill(){
+  const provider=$('#pay-provider').value, phone=$('#pay-phone').value.trim();
+  if(!phone){toast('Enter your mobile money number');return;}
+  $('#pay-status').textContent='Processing payment via '+provider+'…';
+  setTimeout(()=>{
+    const txn='MH'+Math.floor(100000+Math.random()*900000);
+    $('#pay-status').innerHTML='<span class="badge ok">Payment Successful</span>';
+    $('#receipt-card').classList.remove('hidden');
+    $('#receipt-card').innerHTML='<h2>Digital receipt</h2><div class="receipt">Transaction: '+txn+'\nProvider: '+provider+'\nNumber: '+phone+'\nAmount: K 450.00\nDate: '+new Date().toLocaleString()+'\nStatus: SUCCESS</div><button class="btn sm outline" style="margin-top:10px" onclick="downloadReceipt(\''+txn+'\',\''+provider+'\')">Download receipt</button>';
+    toast('Payment successful — receipt generated');
+  },1500);
+}
+function downloadReceipt(txn,provider){
+  const text='MyHospital Zambia — Digital Receipt\nTransaction: '+txn+'\nProvider: '+provider+'\nAmount: K 450.00\nDate: '+new Date().toLocaleString()+'\nStatus: SUCCESS';
+  const blob=new Blob([text],{type:'text/plain'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=txn+'_receipt.txt';a.click();
+}
+
+function toggleOffline(on){
+  store('mh_offline',on);
+  if(on){store('mh_cache_snapshot',{appts:load('mh_appts',[]),rx:load('mh_reminders',{}),cachedAt:new Date().toISOString()});
+    $('#offline-note').textContent='Your records are cached on this device and available without a connection.';}
+  else{$('#offline-note').textContent='Offline cache disabled.';}
+}
+
+(function init(){
+  const lang=load('mh_lang','en');
+  document.querySelector('select[onchange^="setLang"]').value=lang;
+  applyLang();
+  $('#offline-toggle').checked=load('mh_offline',false);
+  toggleOffline(load('mh_offline',false));
+  if(load('mh_logged_in',false)){
+    $('#view-login').classList.add('hidden');
+    $('#app-header').classList.remove('hidden');
+    go('home');
+  }
+})();
+</script>
+</body>
+</html>
